@@ -17,15 +17,31 @@ class OrdersController < ApplicationController
         product_list.save
       end
 
-      redirect_to order_path(@order)
+      redirect_to order_path(@order.token)
     else
       render 'carts/checkout'
     end
   end
 
   def show
-    @order = Order.find(params[:id])
+    @order = Order.find_by_token(params[:id])
     @product_lists = @order.product_lists
+  end
+
+  def pay_with_alipay
+    @order = Order.find_by_token(params[:id])
+    @order.set_payment_with!("alipay")
+    @order.pay!
+
+    redirect_to order_path(@order.token), notice: "使用支付宝成功完成付款"
+  end
+
+  def pay_with_wechat
+    @order = Order.find_by_token(params[:id])
+    @order.set_payment_with!("wechat")
+    @order.pay!
+
+    redirect_to order_path(@order.token), notice: "使用微信支付成功完成付款"
   end
 
   private
